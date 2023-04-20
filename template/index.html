@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .sender{
+      position: fixed;
+      bottom: 100px;
+      right: 100px;
+
+    }
+  </style>
+</head>
+<body>
+  <h1>GO Web Socket</h1>
+  <h3>Host: {{ .Host }}</h3>
+
+  <section>
+    <div id="board">
+
+    </div>
+    <button class="sender" onclick="sendMessage()">Send</button>
+  </section>
+  
+</body>
+<script>
+  const url = "ws://"+"{{ .Host}}"+"/ws"
+  const ws = new WebSocket(url)
+
+  let counter = 1
+  ws.onmessage=(evt)=>{
+    console.log(evt.data);
+    const board = document.getElementById("board");
+    board.innerHTML += "<div>"+ evt.data+"<div><br>"
+    document.documentElement.scrollTo({top: document.documentElement.scrollHeight, behavior:"smooth"})
+  }
+
+  ws.onopen=(evt)=>{
+    console.log(evt);
+    ws.send("ping");
+  }
+
+  function sendMessage(){
+    console.log(ws.readyState);
+    if (ws.readyState != 1) return;
+
+    ws.send("Message "+ counter++)
+  }
+
+</script>
+</html>
