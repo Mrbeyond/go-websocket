@@ -1,6 +1,9 @@
 package main
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"log"
+)
 
 type Hub struct {
 	clients    map[*CLient]bool
@@ -24,14 +27,13 @@ func (h *Hub) run() {
 		case newClient := <-h.register:
 			ID := newClient.User.ID
 			for client := range h.clients {
-				message := []byte("Someone joined  the room: (Name: " + ID + ")")
+				message := []byte("\t h.register: Hey " + client.User.ID + " Someone joined the room: (Name: " + ID + ")")
 				client.send <- message
 			}
 			h.clients[newClient] = true
 
 		case leavingClient := <-h.unregister:
 			ID := leavingClient.User.ID
-
 			if _, ok := h.clients[leavingClient]; ok {
 				delete(h.clients, leavingClient)
 				close(leavingClient.send)
@@ -40,6 +42,7 @@ func (h *Hub) run() {
 				message := []byte("Someone left  the room: (Name: " + ID + ")")
 				client.send <- message
 			}
+
 		case userMessage := <-h.broadcast:
 			var data map[string][]byte
 			json.Unmarshal(userMessage, &data)
@@ -48,16 +51,15 @@ func (h *Hub) run() {
 				if client.User.ID == string(data["id"]) {
 					continue
 				}
-				for {
-					select {
-					case client.send <- data["message"]:
-					default:
-						close(client.send)
-						delete(h.clients, client)
-					}
+
+				select {
+				case client.send <- data["message"]:
+				default:
+					log.Println("\n hub default closer for user \t", client.User.ID, "\n ")
+					close(client.send)
+					delete(h.clients, client)
 				}
 			}
 		}
-
 	}
 }

@@ -28,7 +28,18 @@
   
 </body>
 <script>
-  const url = "ws://"+"{{ .Host}}"+"/ws"
+  let user = window.location.search.slice(1).split("&").find(q=>q.startsWith("user"))
+  // location.
+  if (user) {
+    user = user.slice(user.indexOf("=")+1)
+  }else {
+    const rand = Array.from((Math.random()* 10000).toFixed(0)).map(n=>Number(n)*30)
+    // console.log({rand});
+    const int8 = new Int8Array(rand)
+    user = String.fromCharCode.apply(null, int8);    
+  }
+  console.log({user});
+  const url = "ws://"+"{{ .Host}}"+"/board?user="+user
   const ws = new WebSocket(url)
 
   let counter = 1

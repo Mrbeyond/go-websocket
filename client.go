@@ -24,6 +24,12 @@ var (
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+
+			userID := r.URL.Query().Get("user")
+			log.Println(userID, "user_id joined")
+			return true
+		},
 	}
 )
 
@@ -32,7 +38,7 @@ type User struct {
 }
 
 type CLient struct {
-	hub  *Hub // Map of clients and clients' signatures
+	hub  *Hub // Map of all connected clients and clients' signatures
 	conn *websocket.Conn
 	send chan []byte
 	User User
@@ -57,11 +63,9 @@ func (c *CLient) readPump() {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway,
 				websocket.CloseAbnormalClosure,
 			) {
-				{
-					log.Printf("error: %v", err)
-				}
-				break
+				log.Printf("error: %v", err)
 			}
+			break
 		}
 		// Remove spaces around the message covering =>(replace newline at the beginning with space)
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
@@ -88,7 +92,7 @@ func (c *CLient) writePump() {
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				//Hub closes the channel
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				c.conn.WriteMessage(websocket.CloseMessage, []byte("not ok"))
 				return
 			}
 			w, err := c.conn.NextWriter(websocket.TextMessage)
@@ -125,8 +129,7 @@ func serverWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	client := &CLient{hub: hub, conn: conn, send: make(chan []byte, 265)}
 	client.hub.register <- client
 	client.User.ID = r.URL.Query().Get("user")
-
 	go client.writePump()
 	go client.readPump()
-	client.send <- []byte("Welome")
+	client.send <- []byte("Hi " + client.User.ID + ", you are welcome")
 }

@@ -21,11 +21,11 @@ func main() {
 	app.LoadHTMLGlob("template/*")
 
 	hub := newHub()
-	hub.run()
+	go hub.run()
 
 	app.GET("/", HomeHandler)
 	app.GET("/ws", BasicSocHandler)
-	app.GET("/broad", func(ctx *gin.Context) {
+	app.GET("/board", func(ctx *gin.Context) {
 		serverWs(hub, ctx.Writer, ctx.Request)
 	})
 	server := http.Server{
@@ -89,8 +89,5 @@ func HomeHandler(c *gin.Context) {
 	data := Data{
 		Host: c.Request.Host,
 	}
-
-	fmt.Println(data, "ade")
-
 	c.HTML(200, "index.html", data)
 }
