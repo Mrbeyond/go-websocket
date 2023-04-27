@@ -48,11 +48,9 @@ func main() {
 func BasicSocHandler(c *gin.Context) {
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		fmt.Println("Zero")
 		log.Fatal(err)
 		return
 	}
-
 	defer ws.Close()
 
 	for {
