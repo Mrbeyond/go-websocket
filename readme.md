@@ -66,4 +66,6 @@ func (c *CLient) writePump() {}
   func (h *Hub) run() {}
 ```
 
+When hhtp request is sent the servers `/` http route, the index page is loaded. On the index page, websocket is established and pointed to the `/broadcast` http route on which the request is upgraded to websocket connection.  A client address instance is created and added to the Hub through register channel.
+
 Client's `readPump` reads incoming message from the client's side. The client's send channel is watched by the write pump and the message in []bytes is sent back to the clients side. That is the basic I/O flow of messages between the server and the frontend's socket. The Hub is the group of active clients and it helps during broadcasting. If broadcasting is needed, the readPump signals the Hub's broadcast channel, the message is read from the Hub's `broadcast` channel, all other clients in the Hub are signaled by sending the message through the individual client's `send` channel. The clients are `pointers`, the `writePump` method of each client process the message on the `send` channel and send the message back to the frontend's socket connection for each client.
