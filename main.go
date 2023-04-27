@@ -24,7 +24,7 @@ func main() {
 	go hub.run()
 
 	app.GET("/", HomeHandler)
-	app.GET("/ws", BasicSocHandler)
+	app.GET("/ws", BasicSocketHandler)
 	app.GET("/board", func(ctx *gin.Context) {
 		serverWs(hub, ctx.Writer, ctx.Request)
 	})
@@ -45,7 +45,7 @@ func main() {
 	// }()
 }
 
-func BasicSocHandler(c *gin.Context) {
+func BasicSocketHandler(c *gin.Context) {
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Fatal(err)
