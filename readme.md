@@ -31,7 +31,7 @@ The basic flow of operation from initial page load to websocket connection on th
 
 *Client and Hub struct:*
 
-```
+```go
   type User struct {
     ID string
   }

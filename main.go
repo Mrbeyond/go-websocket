@@ -33,7 +33,7 @@ func main() {
 		Handler:        app,
 		ReadTimeout:    1 * time.Minute,
 		WriteTimeout:   2 * time.Minute,
-		MaxHeaderBytes: 2 << 20,
+		MaxHeaderBytes: 1 << 20,
 	}
 
 	// go func() {
@@ -56,15 +56,15 @@ func BasicSocketHandler(c *gin.Context) {
 	for {
 
 		messageType, message, err := ws.ReadMessage()
-		if messageType == -1 {
-			fmt.Println("closing =>", messageType, string(message))
-		} else {
-			fmt.Println("messageType =>", messageType, string(message))
-		}
 		if err != nil {
 			fmt.Println("One", err.Error(), "here", messageType)
 			log.Fatal(err)
 			break
+		}
+		if messageType == -1 {
+			fmt.Println("closing => ", messageType, string(message))
+		} else {
+			fmt.Println("messageType => ", messageType, string(message))
 		}
 
 		if string(message) == "ping" {
